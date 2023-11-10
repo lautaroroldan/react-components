@@ -1,6 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
+import { DayPicker } from 'react-day-picker'
+import { es } from 'date-fns/locale';
+import 'react-day-picker/dist/style.css';
 // BLUE #1D90F5
 // Grey #abb4c1
 // Btn remove #9FA6AF
@@ -51,17 +54,7 @@ function DatePicker({ placeholder: titleInput = 'select a day', minDate, maxDate
 
     const [open, setOpen] = useState(false)
     const [date, setDate] = useState<Date | null>(null)
-    // const today = new Date()
-
-
-    // disabled || (minDate && date && date < minDate || date && maxDate && date > maxDate)
-    // disabled || (date && minDate || maxDate) && (date < minDate || date > maxDate)
-
-    // disabled ||
-    // (day && (minDate || maxDate)) &&
-    // ((minDate && new Date(2019, 6, day) < minDate) === true || (maxDate && new Date(2019, 6, day) > maxDate) === true)
-
-    // day && minDate && new Date(2019, 6, day) < minDate
+    const [selectedDay, setSelectedDay] = useState<Date>();
 
     function isDisabled(day: number) {
         if (disabled) return true
@@ -91,17 +84,19 @@ function DatePicker({ placeholder: titleInput = 'select a day', minDate, maxDate
                     <Calendar />
                     <div className='flex-1 relative'>
                         <p
-                            className='text-left relative top-1 focus:outline-0 cursor-pointer w-full font-semibold'>{date ? format(date, 'dd/MM/yy') : ''}</p>
+                            className='text-left relative top-1 focus:outline-0 cursor-pointer w-full font-semibold'>{selectedDay ? format(selectedDay, 'dd/MM/yy') : ''}</p>
                         <motion.p
                             initial={{ y: 0, x: 0, top: 0, }}
-                            animate={date ? { y: -12, color: '#abb4c1' } : open ? { y: -12, } : { y: 0, color: '#abb4c1' }}
+                            animate={selectedDay ? { y: -12, color: '#abb4c1' } : open ? { y: -12, } : { y: 0, color: '#abb4c1' }}
                             transition={{ duration: 0.1 }}
-                            className={`absolute text-left  left-0 right-0 text-[#1D90F5] ${open && !date ? 'text-sm' : date ? 'text-base' : 'text-base'}`} >{placeholder}</motion.p>
+                            className={`absolute text-left  left-0 right-0 text-[#1D90F5] ${open && !selectedDay ? 'text-sm' : selectedDay ? 'text-base' : 'text-base'}`} >{placeholder}</motion.p>
                     </div>
 
                     {ChevronDown}
                 </button>
             </section>
+
+
 
             <AnimatePresence >
 
@@ -112,19 +107,30 @@ function DatePicker({ placeholder: titleInput = 'select a day', minDate, maxDate
                         exit={{ opacity: 0, y: -40, transition: { duration: 0.2 } }}
                         transition={{ duration: 0.4, type: 'spring' }}
 
-                        className='absolute bg-white text-black font-lato top-16 right-0 left-0 py-4 px-6 rounded-2xl flex flex-col gap-4 z-0'>
-                        <article className='flex items-center justify-between ml-2'>
-                            <h2 className='font-bold text-xl'>July 2019</h2>
-                            <div className='flex items-center gap-6'>
-                                <ChevronLeft />
-                                <ChevronRight />
-                            </div>
-                        </article>
-
+                        className='absolute bg-white text-black font-lato top-16 right-0 left-0 py-4 px-6 rounded-2xl gap-4 z-0'>
+                        <DayPicker
+                            defaultMonth={selectedDay ?? new Date()}
+                            required
+                            captionLayout="dropdown-buttons"
+                            fromYear={1950}
+                            toYear={2025}
+                            weekStartsOn={1}
+                            mode="single"
+                            showOutsideDays
+                            selected={selectedDay}
+                            onSelect={setSelectedDay}
+                            classNames={{
+                                day_selected: 'bg-[#f4f9fe] text-[#1D90F5] font-bold',
+                                day_outside: 'text-[#abb4c1]',
+                            }}
+                            fixedWeeks
+                            locale={es}
+                        />
+                        {/* 
                         <div
                             className='grid grid-cols-7 w-full gap-3'>
                             {days.map(day => (
-                                <div key={crypto.randomUUID()} className='font-bold w-8 h-8'>{day}</div>
+                                <div key={crypto.randomUUID()} className='font-bold text-center w-8 h-8'>{day}</div>
                             ))}
                             {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                                 <button
@@ -133,7 +139,7 @@ function DatePicker({ placeholder: titleInput = 'select a day', minDate, maxDate
                                         setDate(new Date(2019, 9, day))
                                     }}
                                     disabled={isDisabled(day)}
-                                    className={` ${day == date?.getDate() ? 'bg-[#1D90F5] text-white  ' : 'hover:bg-[#f4f9fe] hover:text-[#1D90F5] '} ${minDate && new Date(2023, 9, day) < minDate ? 'text-[#9FA6AF] ' : 'text-black font-semibold '}  w-8 h-8 rounded-full `}
+                                    className={` ${day == date?.getDate() ? 'bg-[#1D90F5] text-white  ' : 'hover:bg-[#f4f9fe] hover:text-[#1D90F5] '} ${minDate && new Date(2023, 9, day) < minDate ? 'text-[#9FA6AF] ' : 'text-black font-semibold '}  w-8 h-8 rounded-full text-center `}
                                 >
                                     {day}
                                 </button>
@@ -156,7 +162,7 @@ function DatePicker({ placeholder: titleInput = 'select a day', minDate, maxDate
                             >
                                 Done
                             </button>
-                        </div>
+                        </div> */}
 
                     </motion.section>)}
             </AnimatePresence>
